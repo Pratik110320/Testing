@@ -1,0 +1,588 @@
+{
+	"info": {
+		"_postman_id": "b1de69f4-6d95-47d8-9682-2af72939662a",
+		"name": "OpenGalaxy APIs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38886066",
+		"_collection_link": "https://regalinfo.postman.co/workspace/Open_galaxy~b2a6e69a-fe16-4d99-96f0-49fa487c4e01/collection/38886066-b1de69f4-6d95-47d8-9682-2af72939662a?action=share&source=collection_link&creator=38886066"
+	},
+	"item": [
+		{
+			"name": "Update Profile",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "JSESSIONID=69F16C8CD9BD02E1832D1E998551E052",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\r\n  \"email\": \"mamidpalliwarishan@gmail.com\",\r\n  \"fullName\": \"Ishan A Mamidpalliwar\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/users/me",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "view profile",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "JSESSIONID=B8159F798D72F99028265BA9047AD6F8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/api/users/me",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Problem",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Cookie",
+						"value": "JSESSIONID=B8159F798D72F99028265BA9047AD6F8",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"Test Problem 1111111111111111\",\r\n    \"description\": \"This is a test problem description.\",\r\n    \"codeSnippet\": \"print('Hello, World!')\",\r\n    \"githubRepo\": \"test/repo\",\r\n    \"repoLink\": \"https://github.com/test/repo\",\r\n    \"environment\": \"Python 3.8\",\r\n    \"status\": \"OPEN\",\r\n    \"tags\": [\r\n        \"python\",\r\n        \"beginner\"\r\n    ]\r\n}"
+				},
+				"url": {
+					"raw": "{{baseUril}}/api/problems",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"problems"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Submit Solution",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Cookie",
+						"value": "JSESSIONID=7FA7C53E975875844374F2767A15AFD1",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"content\":\"This is a test solution.\",\"codeSnippet\":\"def solve(): return 'Solution'\",\"repoLink\":\"https://github.com/test/solution\"}"
+				},
+				"url": {
+					"raw": "{{baseUril}}/api/solutions/68864f1a31721a6a7a61e2ef",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"solutions",
+						"68864f1a31721a6a7a61e2ef"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Own Problems",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}"
+					}
+				],
+				"url": {
+					"raw": "{{baseUril}}/api/problems/me",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"problems",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Problems",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUril}}/api/problems",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"problems"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Problem with Solutions",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUril}}/api/problems/6884b7b3c945b41616aeee44/solutions",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"problems",
+						"6884b7b3c945b41616aeee44",
+						"solutions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Problem by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUril}}/api/problems/6884b7b3c945b41616aeee44",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"problems",
+						"6884b7b3c945b41616aeee44"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Saved Problems",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}"
+					}
+				],
+				"url": {
+					"raw": "{{baseUril}}/api/problems/saved",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"problems",
+						"saved"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Accept Solution",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "JSESSIONID=CAC08FA3DAAA4F44A996570AB624FD70",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUril}}/api/solutions/6888bf55129741a0ce2538a5/accept",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"solutions",
+						"6888bf55129741a0ce2538a5",
+						"accept"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Like Problem",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"disabled": true
+					},
+					{
+						"key": "Cookie",
+						"value": "JSESSIONID=EC26C4BAC2B67A7CEB6A776C7924D44A",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUril}}/api/problems/68864f1a31721a6a7a61e2ef/like",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"problems",
+						"68864f1a31721a6a7a61e2ef",
+						"like"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Save Problem",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}"
+					}
+				],
+				"url": {
+					"raw": "{{baseUril}}/api/problems/6884b7b3c945b41616aeee44/save",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"problems",
+						"6884b7b3c945b41616aeee44",
+						"save"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Like Solution",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUril}}/api/solutions/6884b80bc945b41616aeee45/like",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"solutions",
+						"6884b80bc945b41616aeee45",
+						"like"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upvote Solution",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}"
+					}
+				],
+				"url": {
+					"raw": "{{baseUril}}/api/solutions/6884b80bc945b41616aeee45/upvote",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"solutions",
+						"6884b80bc945b41616aeee45",
+						"upvote"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Solutions by Problem ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUril}}/api/solutions/problem/{{problemId}}",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"solutions",
+						"problem",
+						"{{problemId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Own Solutions",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}"
+					}
+				],
+				"url": {
+					"raw": "{{baseUril}}/api/solutions/me",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"solutions",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Problem",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"title\":\"Updated Test Problem\",\"description\":\"Updated description.\",\"codeSnippet\":\"print('Updated Hello, World!')\",\"githubRepo\":\"test/updated-repo\",\"repoLink\":\"https://github.com/test/updated-repo\",\"environment\":\"Python 3.9\",\"status\":\"OPEN\",\"tags\":[\"python\",\"intermediate\"]}"
+				},
+				"url": {
+					"raw": "{{baseUril}}/api/problems/{{problemId}}",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"problems",
+						"{{problemId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Problem",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}"
+					}
+				],
+				"url": {
+					"raw": "{{baseUril}}/api/problems/{{problemId}}",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"problems",
+						"{{problemId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Solution",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"content\":\"Updated test solution.\",\"codeSnippet\":\"def solve_updated(): return 'Updated Solution'\",\"repoLink\":\"https://github.com/test/updated-solution\"}"
+				},
+				"url": {
+					"raw": "{{baseUril}}/api/solutions/{{solutionId}}",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"solutions",
+						"{{solutionId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Solution",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}"
+					}
+				],
+				"url": {
+					"raw": "{{baseUril}}/api/solutions/{{solutionId}}",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"solutions",
+						"{{solutionId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "LeaderBoard",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "JSESSIONID=0FF3587E1DE52B172D0A379E8D3914FF",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{baseUril}}/api/public/leaderboard",
+					"host": [
+						"{{baseUril}}"
+					],
+					"path": [
+						"api",
+						"public",
+						"leaderboard"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUril",
+			"value": "{{baseUrl}}",
+			"type": "default"
+		}
+	]
+}
