@@ -1,7 +1,7 @@
 package com.pratik.OpenGalaxy.config;
 
-
 import com.pratik.OpenGalaxy.model.User;
+import com.pratik.OpenGalaxy.service.EmailService;
 import com.pratik.OpenGalaxy.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,10 +20,13 @@ import java.util.logging.Logger;
 public class Oauth2Login implements AuthenticationSuccessHandler {
 
     private static final Logger logger = Logger.getLogger(Oauth2Login.class.getName());
-    private final UserService userService;
 
-    public Oauth2Login(UserService userService) {
+    private final UserService userService;
+    private final EmailService emailService;
+
+    public Oauth2Login(UserService userService, EmailService emailService) {
         this.userService = userService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -39,37 +42,45 @@ public class Oauth2Login implements AuthenticationSuccessHandler {
             String fullName = (String) attributes.get("name");
             String avatarUrl = (String) attributes.get("avatar_url");
 
-            // Fallback for fullName if null
-            if (fullName == null || fullName.trim().isEmpty()) {
-                fullName = username;
-            }
-
-            // Handle null email
-            if (email == null || email.trim().isEmpty()) {
-                email = username + "@github.com"; // Placeholder email
-            }
+            // Fallbacks
+            if (fullName == null || fullName.trim().isEmpty()) fullName = username;
+            if (email == null || email.trim().isEmpty()) email = username + "@github.com"; // Placeholder
 
             Optional<User> existingUser = userService.findByGithubId(githubId);
 
+            User user;
             if (existingUser.isEmpty()) {
-                User newUser = new User();
-                newUser.setGithubId(githubId);
-                newUser.setUsername(username);
-                newUser.setEmail(email);
-                newUser.setFullName(fullName);
-                newUser.setProfilePicture(avatarUrl);
-                newUser.setPassword(null);
-                newUser.setCreatedAt(new Date());
-                newUser.setUpdatedAt(new Date());
-                userService.save(newUser);
-            } else {
-                User user = existingUser.get();
+                // New user creation
+                user = new User();
+                user.setGithubId(githubId);
+                user.setUsername(username);
                 user.setEmail(email);
                 user.setFullName(fullName);
                 user.setProfilePicture(avatarUrl);
+                user.setPassword(null);
+                user.setCreatedAt(new Date());
+                user.setUpdatedAt(new Date());
+                userService.save(user);
+            } else {
+                // Existing user — only update fullName/email if empty, always update avatar
+                user = existingUser.get();
+
+                if (user.getFullName() == null || user.getFullName().trim().isEmpty()) {
+                    user.setFullName(fullName);
+                }
+                if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+                    user.setEmail(email);
+                }
+
+                // Always update profile picture from GitHub
+                user.setProfilePicture(avatarUrl);
+
                 user.setUpdatedAt(new Date());
                 userService.save(user);
             }
+
+            // Send login success email
+            emailService.sendLoginSuccessAlert(user);
 
             response.sendRedirect("/welcome");
         } catch (Exception e) {

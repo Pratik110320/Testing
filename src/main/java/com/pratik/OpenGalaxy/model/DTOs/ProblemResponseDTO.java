@@ -12,7 +12,7 @@ public class ProblemResponseDTO {
     private String environment;
     private String status;
     private List<String> tags;
-    private String postedBy;
+    private UserResponseDTO postedBy;
     private List<String> likes;
     private List<String> savedBy;
     private List<String> solutionIds;
@@ -93,11 +93,11 @@ public class ProblemResponseDTO {
         this.tags = tags;
     }
 
-    public String getPostedBy() {
+    public UserResponseDTO getPostedBy() {
         return postedBy;
     }
 
-    public void setPostedBy(String postedBy) {
+    public void setPostedBy(UserResponseDTO postedBy) {
         this.postedBy = postedBy;
     }
 

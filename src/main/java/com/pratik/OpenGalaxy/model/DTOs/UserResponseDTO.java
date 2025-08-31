@@ -10,6 +10,11 @@ public class UserResponseDTO {
     private String profilePicture;
     private int points;
     private List<String> badges;
+    private String githubId;
+    private String email;
+
+
+
 
     public UserResponseDTO() {
         this.badges = new ArrayList<>();
@@ -54,4 +59,22 @@ public class UserResponseDTO {
     public void setBadges(List<String> badges) {
         this.badges = badges;
     }
+
+    public String getGithubId() {
+        return githubId;
+    }
+
+    public void setGithubId(String githubId) {
+        this.githubId = githubId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+
 }

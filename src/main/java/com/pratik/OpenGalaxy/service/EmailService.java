@@ -20,6 +20,20 @@ public class EmailService {
     }
 
     // ---------- Public API ----------
+    // Call this after successful login via GitHub
+    public void sendLoginSuccessAlert(User user) {
+        if (user == null || isBlank(user.getEmail())) return;
+
+        String subject = "👋 Welcome back to OpenGalaxy!";
+        String body =
+                "Hi " + displayName(user) + ",\n\n" +
+                        "You have successfully logged into OpenGalaxy via GitHub.\n\n" +
+                        "Happy coding!\n\n" +
+                        "Best,\nOpenGalaxy Team";
+
+        send(user.getEmail(), subject, body);
+    }
+
 
     // 1) Problem owner (postedBy) gets an email when their problem is posted
     public void sendProblemPostedAlert(Problem problem) {

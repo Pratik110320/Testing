@@ -3,10 +3,13 @@ package com.pratik.OpenGalaxy.controller;
 import com.pratik.OpenGalaxy.model.DTOs.ProblemRequestDTO;
 import com.pratik.OpenGalaxy.model.DTOs.ProblemResponseDTO;
 import com.pratik.OpenGalaxy.model.DTOs.ProblemWithSolutionsDTO;
+import com.pratik.OpenGalaxy.model.DTOs.UserResponseDTO;
 import com.pratik.OpenGalaxy.model.Problem;
 import com.pratik.OpenGalaxy.model.Solution;
+import com.pratik.OpenGalaxy.model.User;
 import com.pratik.OpenGalaxy.service.ProblemService;
 import com.pratik.OpenGalaxy.service.SolutionService;
+import com.pratik.OpenGalaxy.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,10 +28,12 @@ public class ProblemController {
     private static final Logger logger = Logger.getLogger(ProblemController.class.getName());
     private final ProblemService problemService;
     private final SolutionService solutionService;
+    private final UserService userService;
 
-    public ProblemController(ProblemService problemService, SolutionService solutionService) {
+    public ProblemController(UserService userService, ProblemService problemService, SolutionService solutionService) {
         this.problemService = problemService;
         this.solutionService = solutionService;
+        this.userService = userService;
     }
 
     @PostMapping
@@ -225,7 +230,33 @@ public class ProblemController {
         dto.setLanguage(problem.getLanguage());
         dto.setStatus(problem.getStatus());
         dto.setTags(problem.getTags());
-        dto.setPostedBy(problem.getPostedBy());
+
+        // 🔹 Convert postedBy (String ID) to UserResponseDTO
+        String postedById = problem.getPostedBy(); // this is the user ID stored in Problem
+        if (postedById != null) {
+            try {
+                User user = userService.getUserById(postedById); // fetch User by ID
+                if (user != null) {
+                    // PLACE THE BLOCK HERE
+                    UserResponseDTO userDTO = new UserResponseDTO();
+                    userDTO.setUsername(user.getUsername());
+                    userDTO.setFullName(user.getFullName());
+                    userDTO.setProfilePicture(user.getProfilePicture());
+                    userDTO.setEmail(user.getEmail());
+                    userDTO.setGithubId(user.getGithubId());
+                    userDTO.setPoints(user.getPoints());
+                    userDTO.setBadges(user.getBadges());
+                    dto.setPostedBy(userDTO);
+                } else {
+                    dto.setPostedBy(null);
+                }
+            } catch (Exception e) {
+                dto.setPostedBy(null); // fallback if user not found
+            }
+        } else {
+            dto.setPostedBy(null);
+        }
+
         dto.setLikes(problem.getLikes());
         dto.setSavedBy(problem.getSavedBy());
         dto.setSolutionIds(problem.getSolutionIds());
@@ -233,4 +264,5 @@ public class ProblemController {
         dto.setUpdatedAt(problem.getUpdatedAt());
         return dto;
     }
+
 }

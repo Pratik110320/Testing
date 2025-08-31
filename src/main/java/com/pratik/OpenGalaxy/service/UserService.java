@@ -1,10 +1,12 @@
 package com.pratik.OpenGalaxy.service;
 
+import com.pratik.OpenGalaxy.model.DTOs.UserResponseDTO;
 import com.pratik.OpenGalaxy.model.User;
 import com.pratik.OpenGalaxy.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -60,4 +62,30 @@ public class UserService {
         return userRepository.findById(submittedBy)
                 .orElseThrow(() -> new RuntimeException("User not found : " + submittedBy));
     }
+
+    // inside UserService class
+
+    public UserResponseDTO toUserResponseDTO(User user) {
+        if (user == null) return null;
+        UserResponseDTO dto = new UserResponseDTO();
+        dto.setUsername(user.getUsername());
+        dto.setFullName(user.getFullName());
+        dto.setProfilePicture(user.getProfilePicture());
+        dto.setEmail(user.getEmail());
+        dto.setGithubId(user.getGithubId());
+        dto.setProfilePicture(user.getProfilePicture());
+        dto.setPoints(user.getPoints());
+        dto.setBadges(user.getBadges());
+        return dto;
+    }
+
+    // Optional: batch fetch helper (useful later for performance)
+    public List<User> findAllByIds(List<String> ids) {
+        try {
+            return userRepository.findAllById(ids);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch users by ids: " + e.getMessage(), e);
+        }
+    }
+
 }
