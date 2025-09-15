@@ -13,7 +13,7 @@
 		<relativePath/>
 	</parent>
 
-	<groupId>com.pratik</groupId>
+	<groupId>com.team</groupId>
 	<artifactId>OpenGalaxy</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>OpenGalaxy</name>

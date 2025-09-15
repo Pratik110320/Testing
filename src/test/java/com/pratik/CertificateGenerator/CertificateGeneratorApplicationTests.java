@@ -1,4 +1,4 @@
-package com.pratik.OpenGalaxy;
+package com.team.OpenGalaxy;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
