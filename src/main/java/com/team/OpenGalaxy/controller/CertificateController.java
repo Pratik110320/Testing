@@ -2,7 +2,6 @@ package com.team.OpenGalaxy.controller;
 
 import com.team.OpenGalaxy.model.Certificate;
 import com.team.OpenGalaxy.service.CertificateService;
-import com.team.OpenGalaxy.service.OpenHtmlPdfService;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
@@ -19,43 +18,42 @@ public class CertificateController {
 
     private static final Logger logger = Logger.getLogger(CertificateController.class.getName());
     private final CertificateService certificateService;
-    private final OpenHtmlPdfService pdfService;
 
-    public CertificateController(CertificateService certificateService, OpenHtmlPdfService pdfService) {
+    public CertificateController(CertificateService certificateService) {
         this.certificateService = certificateService;
-        this.pdfService = pdfService;
     }
 
-    @PostMapping("/generate")
-    public ResponseEntity<Map<String, Object>> generateCertificate(
-            @AuthenticationPrincipal DefaultOAuth2User oauthUser,
-            @RequestParam(required = false) String courseTitle) {
+
+    @PostMapping("/create")
+    public ResponseEntity<Map<String, Object>> createCertificate(
+            @AuthenticationPrincipal DefaultOAuth2User oauthUser) {
         try {
             String githubId = oauthUser.getAttribute("id").toString();
-            Certificate certificate;
-            if (courseTitle != null && !courseTitle.trim().isEmpty()) {
-                certificate = certificateService.generateCertificate(githubId, courseTitle);
-            } else {
-                certificate = certificateService.generateCertificateForAchievement(githubId);
-            }
+
+            Certificate certificate = certificateService.createCertificate(githubId);
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("certificateId", certificate.getId());
             response.put("certificate", certificate);
-            response.put("githubProfileUrl", certificate.getGithubProfileUrl());
-            response.put("message", "Certificate generated successfully");
+            response.put("message", "Certificate created successfully.");
             return ResponseEntity.ok(response);
+
         } catch (Exception e) {
-            logger.severe("Error generating certificate: " + e.getMessage());
+            logger.warning("Error creating certificate: " + e.getMessage());
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
-            errorResponse.put("message", "Failed to generate certificate: " + e.getMessage());
+            errorResponse.put("message", e.getMessage());
+            if (e.getMessage().contains("final badge")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+            }
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 
 
-    @GetMapping("/{certificateId}")
+    @GetMapping("/view/{certificateId}")
     public ResponseEntity<Map<String, Object>> getCertificateDetails(@PathVariable String certificateId) {
         try {
             Certificate certificate = certificateService.getCertificateById(certificateId);
@@ -71,49 +69,6 @@ public class CertificateController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
     }
-//
-//    @GetMapping("/verify/{certificateId}")
-//    public ResponseEntity<Map<String, Object>> verifyCertificate(@PathVariable String certificateId) {
-//        try {
-//            boolean isValid = certificateService.verifyCertificate(certificateId);
-//            Certificate certificate = null;
-//            if (isValid) {
-//                certificate = certificateService.getCertificateById(certificateId);
-//            }
-//            Map<String, Object> response = new HashMap<>();
-//            response.put("valid", isValid);
-//            response.put("certificateId", certificateId);
-//            if (certificate != null) {
-//                response.put("certificate", certificate);
-//                response.put("message", "Certificate is valid and authentic");
-//            } else {
-//                response.put("message", "Certificate not found or invalid");
-//            }
-//            return ResponseEntity.ok(response);
-//        } catch (Exception e) {
-//            logger.severe("Error verifying certificate: " + e.getMessage());
-//            Map<String, Object> errorResponse = new HashMap<>();
-//            errorResponse.put("valid", false);
-//            errorResponse.put("message", "Error verifying certificate");
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-//        }
-//    }
-//
-//    @GetMapping("/download/{certificateId}")
-//    public ResponseEntity<byte[]> downloadCertificate(@PathVariable String certificateId) {
-//        try {
-//            String rawHtml = certificateService.generateCertificateHtml(certificateId);
-//            byte[] pdfBytes = pdfService.renderHtmlToPdfInMemory(rawHtml);
-//
-//            return ResponseEntity.ok()
-//                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=certificate.pdf")
-//                    .contentType(MediaType.APPLICATION_PDF)
-//                    .body(pdfBytes);
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(("Error generating PDF: " + e.getMessage()).getBytes());
-//        }
-//    }
+
+
 }

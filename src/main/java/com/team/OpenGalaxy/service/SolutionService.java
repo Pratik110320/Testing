@@ -26,14 +26,14 @@ public class SolutionService {
     private final ProblemService problemService;
     private final UserService userService;
     private final CertificateService certificateService;
-
     private static final int[] BADGE_THRESHOLDS = {1, 3, 5, 7, 10, 12, 15, 17, 20, 25, 30, 35, 40, 45, 50};
     private static final String[] BADGE_NAMES = {
-            "Rookie", "Rookie 1", "Rookie 2", "Coder", "Coder 1",
-            "Coder 2","Hacker", "Hacker 1", "Hacker 2", "Architect", "Architect 1",
-            "Architect 2", "Legend 1", "Legend 2", "Legend 3"
+            "Rookie 1", "Rookie 2", "Rookie 3", "Coder 1", "Coder 2",
+            "Coder 3","Hacker 1", "Hacker 2", "Hacker 3", "Architect 1", "Architect 2",
+            "Architect 3", "Legend 1", "Legend 2", "Legend 3"
     };
 
+    public static final String FINAL_BADGE_NAME = "Rookie 1";
 
     public SolutionService(SolutionRepository solutionRepository,
                            ProblemService problemService,
@@ -228,11 +228,10 @@ public class SolutionService {
                         String submitterGithubId = submitter.getGithubId();
 
                         if (submitterGithubId != null) {
-                            certificateService.generateCertificateForAchievement(submitterGithubId);
-                            logger.info("Certificate generated for user " + submitterGithubId + " after earning new badge");
-                        }
+
+                            logger.info("User " + submitterGithubId + " earned a new badge.");                        }
                     } catch (Exception e) {
-                        logger.warning("Failed to generate certificate for user after badge achievement: " + e.getMessage());
+                        logger.warning("Failed during badge achievement hook: " + e.getMessage());
 
                     }
                 }

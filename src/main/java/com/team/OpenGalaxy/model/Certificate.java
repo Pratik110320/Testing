@@ -14,10 +14,9 @@ public class Certificate {
     private String id;
     private String userId;
     private String userName;
-    private String courseTitle;
-    private String primarySkill;
-    private List<String> allSkills;
-    private String qrCodeData; // Base64 encoded QR code image
+    private String courseTitle;            // users fuull name
+    private String primarySkill; // latest badge
+    private List<String> allSkills;//all badges
     private String verificationUrl;
     private Date generatedAt;
     private String issuedDate; // Formatted date string for display
@@ -86,16 +85,7 @@ public class Certificate {
     public void setAllSkills(List<String> allSkills) {
         this.allSkills = allSkills;
     }
-
-    public String getQrCodeData() {
-        return qrCodeData;
-    }
-
-    public void setQrCodeData(String qrCodeData) {
-        this.qrCodeData = qrCodeData;
-    }
-
-    public String getVerificationUrl() {
+public String getVerificationUrl() {
         return verificationUrl;
     }
 
