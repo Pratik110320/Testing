@@ -29,9 +29,9 @@ public class SolutionService {
 
     private static final int[] BADGE_THRESHOLDS = {1, 3, 5, 7, 10, 12, 15, 17, 20, 25, 30, 35, 40, 45, 50};
     private static final String[] BADGE_NAMES = {
-            "Code Spark", "Stellar Coder", "Cosmic Contributor", "Galaxy Explorer", "Nebula Navigator",
-            "Star Solver", "Orbit Master", "Astro Achiever", "Supernova Star", "Interstellar Innovator",
-            "Cosmic Trailblazer", "Galactic Guru", "Stellar Vanguard", "Nebula Champion", "Universal Legend"
+            "Rookie", "Rookie 1", "Rookie 2", "Coder", "Coder 1",
+            "Coder 2","Hacker", "Hacker 1", "Hacker 2", "Architect", "Architect 1",
+            "Architect 2", "Legend 1", "Legend 2", "Legend 3"
     };
 
 

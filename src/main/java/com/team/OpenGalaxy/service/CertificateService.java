@@ -10,7 +10,6 @@ import com.team.OpenGalaxy.model.User;
 import com.team.OpenGalaxy.repository.CertificateRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.ModelAndView;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -33,7 +32,6 @@ public class CertificateService {
 
     private final CertificateRepository certificateRepository;
     private final UserService userService;
-    // REMOVED: private final SolutionService solutionService; // This was causing circular dependency
     private final TemplateEngine templateEngine;
 
     @Value("${app.base-url:http://localhost:8080}")
@@ -47,52 +45,32 @@ public class CertificateService {
         this.templateEngine = templateEngine;
     }
 
+    // This method is for when a specific course title is provided
     public Certificate generateCertificate(String githubId, String courseTitle) {
         try {
             User user = userService.getUserByGithubId(githubId);
-
-            // Generate unique certificate ID
-            String certificateId = UUID.randomUUID().toString();
-
-            // Get user's badges (skills)
-            List<String> badges = user.getBadges();
-            String primarySkill = badges != null && !badges.isEmpty() ?
-                    badges.get(badges.size() - 1) : "Code Spark"; // Latest badge or default
-
-            String githubProfileUrl = "https://github.com/" + user.getUsername();
-            String certificateViewUrl = baseUrl + "/api/certificates/view/" + certificateId;
-
-// Generate QR code for GitHub profile
-            String qrCodeBase64 = generateQRCode(githubProfileUrl);
-
-            Certificate certificate = new Certificate();
-            certificate.setId(certificateId);
-            certificate.setUserId(user.getId());
-            certificate.setUserName(user.getFullName() != null ? user.getFullName() : user.getUsername());
-            certificate.setCourseTitle(courseTitle);
-            certificate.setPrimarySkill(primarySkill);
-            certificate.setAllSkills(badges);
-            certificate.setQrCodeData(qrCodeBase64);
-            certificate.setVerificationUrl(certificateViewUrl); // for viewing the certificate
-            certificate.setGithubProfileUrl(githubProfileUrl);   // new field in your model
-            certificate.setGeneratedAt(new Date());
-            certificate.setIssuedDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy")));
-
-            Certificate savedCertificate = certificateRepository.save(certificate);
-
-            logger.info("Certificate generated successfully for user: " + githubId + " with ID: " + certificateId);
-
-            return savedCertificate;
+            String primarySkill = determinePrimarySkill(user.getBadges());
+            return createCertificateRecord(githubId, courseTitle, primarySkill, user.getBadges());
         } catch (Exception e) {
-            logger.severe("Failed to generate certificate for user " + githubId + ": " + e.getMessage());
+            logger.severe("Failed to generate certificate with course title: " + e.getMessage());
             throw new RuntimeException("Failed to generate certificate: " + e.getMessage(), e);
         }
     }
 
-    public Certificate getCertificateById(String certificateId) {
-        return certificateRepository.findById(certificateId)
-                .orElseThrow(() -> new RuntimeException("Certificate not found with ID: " + certificateId));
+    // This is for generating based on achievements
+    public Certificate generateCertificateForAchievement(String githubId) {
+        try {
+            User user = userService.getUserByGithubId(githubId);
+            String courseTitle = determineCourseTitle(user.getPoints(), user.getBadges());
+            String primarySkill = determinePrimarySkill(user.getBadges());
+            return createCertificateRecord(githubId, courseTitle, primarySkill, user.getBadges());
+        } catch (Exception e) {
+            logger.severe("Failed to generate achievement certificate for user " + githubId + ": " + e.getMessage());
+            throw new RuntimeException("Failed to generate achievement certificate: " + e.getMessage(), e);
+        }
     }
+
+    // --- METHODS ADDED BACK IN ---
 
     public List<Certificate> getCertificatesByUser(String githubId) {
         try {
@@ -101,48 +79,6 @@ public class CertificateService {
         } catch (Exception e) {
             logger.severe("Failed to retrieve certificates for user " + githubId + ": " + e.getMessage());
             throw new RuntimeException("Failed to retrieve certificates: " + e.getMessage(), e);
-        }
-    }
-
-    public ModelAndView getCertificateView(String certificateId) {
-        try {
-            Certificate certificate = getCertificateById(certificateId);
-
-            ModelAndView modelAndView = new ModelAndView("certificate");
-            modelAndView.addObject("name", certificate.getUserName());
-            modelAndView.addObject("courseTitle", certificate.getCourseTitle());
-            modelAndView.addObject("primarySkill", certificate.getPrimarySkill());
-            modelAndView.addObject("allSkills", certificate.getAllSkills());
-            modelAndView.addObject("completionDate", certificate.getIssuedDate());
-            modelAndView.addObject("qrCodeData", certificate.getQrCodeData());
-            modelAndView.addObject("verifyUrl", certificate.getVerificationUrl());
-            modelAndView.addObject("issuer", "OpenGalaxy");
-
-            return modelAndView;
-        } catch (Exception e) {
-            logger.severe("Failed to create certificate view for ID " + certificateId + ": " + e.getMessage());
-            throw new RuntimeException("Failed to create certificate view: " + e.getMessage(), e);
-        }
-    }
-
-    public String generateCertificateHtml(String certificateId) {
-        try {
-            Certificate certificate = getCertificateById(certificateId);
-
-            Context context = new Context();
-            context.setVariable("name", certificate.getUserName());
-            context.setVariable("courseTitle", certificate.getCourseTitle());
-            context.setVariable("primarySkill", certificate.getPrimarySkill());
-            context.setVariable("allSkills", certificate.getAllSkills());
-            context.setVariable("completionDate", certificate.getIssuedDate());
-            context.setVariable("qrCodeData", certificate.getQrCodeData());
-            context.setVariable("verifyUrl", certificate.getVerificationUrl());
-            context.setVariable("issuer", "OpenGalaxy");
-
-            return templateEngine.process("certificate", context);
-        } catch (Exception e) {
-            logger.severe("Failed to generate certificate HTML for ID " + certificateId + ": " + e.getMessage());
-            throw new RuntimeException("Failed to generate certificate HTML: " + e.getMessage(), e);
         }
     }
 
@@ -155,55 +91,77 @@ public class CertificateService {
         }
     }
 
-    // MOVED AND SIMPLIFIED: This method now uses User data directly instead of SolutionService
-    public Certificate generateCertificateForAchievement(String githubId) {
+    // --- HELPER AND OTHER METHODS ---
+
+    private Certificate createCertificateRecord(String githubId, String courseTitle, String primarySkill, List<String> allSkills) {
         try {
             User user = userService.getUserByGithubId(githubId);
+            String certificateId = UUID.randomUUID().toString();
+            String githubProfileUrl = "https://github.com/" + user.getUsername();
+            String qrCodeBase64 = generateQRCode(githubProfileUrl);
 
-            // Determine course title based on user's badges/points
-            String courseTitle = determineCourseTitle(user.getPoints(), user.getBadges());
+            Certificate certificate = new Certificate();
+            certificate.setId(certificateId);
+            certificate.setUserId(user.getId());
+            certificate.setUserName(user.getFullName() != null ? user.getFullName() : user.getUsername());
+            certificate.setCourseTitle(courseTitle);
+            certificate.setPrimarySkill(primarySkill);
+            certificate.setAllSkills(allSkills);
+            certificate.setQrCodeData(qrCodeBase64);
+            certificate.setVerificationUrl(baseUrl + "/api/certificates/view/" + certificateId);
+            certificate.setGithubProfileUrl(githubProfileUrl);
+            certificate.setGeneratedAt(new Date());
+            certificate.setIssuedDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy")));
 
-            return generateCertificate(githubId, courseTitle);
+            return certificateRepository.save(certificate);
+
         } catch (Exception e) {
-            logger.severe("Failed to generate achievement certificate for user " + githubId + ": " + e.getMessage());
-            throw new RuntimeException("Failed to generate achievement certificate: " + e.getMessage(), e);
+            logger.severe("Failed to create certificate record for user " + githubId + ": " + e.getMessage());
+            throw new RuntimeException("Failed to create certificate record: " + e.getMessage(), e);
         }
     }
 
-    private String determineCourseTitle(int points, List<String> badges) {
-        if (badges == null || badges.isEmpty()) {
-            return "Problem Solving Fundamentals";
-        }
+    private String determinePrimarySkill(List<String> badges) {
+        if (badges == null || badges.isEmpty()) return "Getting Started";
+        return badges.get(badges.size() - 1);
+    }
 
+    private String determineCourseTitle(int points, List<String> badges) {
+        if (badges == null || badges.isEmpty()) return "Welcome to OpenGalaxy";
         String latestBadge = badges.get(badges.size() - 1);
         return switch (latestBadge) {
             case "Code Spark" -> "Problem Solving Fundamentals";
             case "Stellar Coder", "Cosmic Contributor" -> "Intermediate Problem Solving";
-            case "Galaxy Explorer", "Nebula Navigator", "Star Solver" -> "Advanced Algorithmic Thinking";
-            case "Orbit Master", "Astro Achiever", "Supernova Star" -> "Expert Problem Solving";
-            case "Interstellar Innovator", "Cosmic Trailblazer" -> "Master Algorithm Designer";
-            default -> "Elite Problem Solving Mastery";
+            default -> "Advanced Problem Solving";
         };
+    }
+
+    public Certificate getCertificateById(String certificateId) {
+        return certificateRepository.findById(certificateId)
+                .orElseThrow(() -> new RuntimeException("Certificate not found with ID: " + certificateId));
+    }
+
+    public String generateCertificateHtml(String certificateId) {
+        Certificate certificate = getCertificateById(certificateId);
+        Context context = new Context();
+        context.setVariable("name", certificate.getUserName());
+        context.setVariable("courseTitle", certificate.getCourseTitle());
+        context.setVariable("allSkills", certificate.getAllSkills());
+        context.setVariable("completionDate", certificate.getIssuedDate());
+        context.setVariable("qrCodeData", certificate.getQrCodeData());
+        return templateEngine.process("certificate", context);
     }
 
     private String generateQRCode(String data) {
         try {
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
             BitMatrix bitMatrix = qrCodeWriter.encode(data, BarcodeFormat.QR_CODE, 200, 200);
-
-            BufferedImage bufferedImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            ImageIO.write(bufferedImage, "PNG", outputStream);
-
-            byte[] imageBytes = outputStream.toByteArray();
-            return Base64.getEncoder().encodeToString(imageBytes);
+            ImageIO.write(MatrixToImageWriter.toBufferedImage(bitMatrix), "PNG", outputStream);
+            return Base64.getEncoder().encodeToString(outputStream.toByteArray());
         } catch (WriterException | IOException e) {
             logger.severe("Failed to generate QR code: " + e.getMessage());
             throw new RuntimeException("Failed to generate QR code: " + e.getMessage(), e);
         }
     }
-
-
-
-
 }

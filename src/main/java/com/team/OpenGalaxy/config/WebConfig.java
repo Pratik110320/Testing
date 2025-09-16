@@ -18,7 +18,7 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:5173") // allow frontend React app
+                        .allowedOrigins("http://localhost:3000") // allow frontend React app
                         .allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*") // allow all headers
                         .allowCredentials(true); // 🔑 allow cookies (JSESSIONID)

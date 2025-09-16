@@ -6,6 +6,7 @@ import com.team.OpenGalaxy.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -20,7 +21,8 @@ import java.util.logging.Logger;
 public class Oauth2Login implements AuthenticationSuccessHandler {
 
     private static final Logger logger = Logger.getLogger(Oauth2Login.class.getName());
-
+    @Value("${frontend.url}")
+    private String frontendUrl;
     private final UserService userService;
     private final EmailService emailService;
 
@@ -82,7 +84,7 @@ public class Oauth2Login implements AuthenticationSuccessHandler {
             // Send login success email
             emailService.sendLoginSuccessAlert(user);
 
-            response.sendRedirect("/welcome");
+            response.sendRedirect(frontendUrl);
         } catch (Exception e) {
             logger.severe("Authentication failed: " + e.getMessage());
             throw new ServletException("Authentication failed: " + e.getMessage(), e);
