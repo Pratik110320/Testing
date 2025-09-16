@@ -31,7 +31,12 @@ public class CertificateService {
 
     @Value("${app.base-url:http://localhost:8080}")
     private String baseUrl;
-
+    private static final int[] BADGE_THRESHOLDS = {1, 3, 5, 7, 10, 12, 15, 17, 20, 25, 30, 35, 40, 45, 50};
+    private static final String[] BADGE_NAMES = {
+            "Rookie 1", "Rookie 2", "Rookie 3", "Coder 1", "Coder 2",
+            "Coder 3","Hacker 1", "Hacker 2", "Hacker 3", "Architect 1", "Architect 2",
+            "Architect 3", "Legend 1", "Legend 2", "Legend 3"
+    };
     public CertificateService(CertificateRepository certificateRepository,
                               UserService userService,
                               TemplateEngine templateEngine) {
@@ -39,25 +44,47 @@ public class CertificateService {
         this.userService = userService;
     }
 
-    public Certificate createCertificate(String githubId) {
+    /**
+     * Creates a new certificate for a user if they meet all requirements,
+     * or returns their existing active certificate.
+     *
+     * @param user The authenticated User object.
+     * @return An existing or newly created Certificate.
+     * @throws RuntimeException if the user has not met the badge requirements.
+     */
+    public Certificate createCertificate(User user) {
         try {
-            User user = userService.getUserByGithubId(githubId);
-
-
-            List<String> badges = user.getBadges();
-            if (badges == null || !badges.contains(SolutionService.FINAL_BADGE_NAME)) {
-                throw new RuntimeException("User has not earned the final badge ('" + SolutionService.FINAL_BADGE_NAME + "') yet.");
+            // 1. Check if an active certificate already exists for this user
+            List<Certificate> existingCerts = certificateRepository.findByUserIdAndIsActive(user.getId(), true);
+            if (existingCerts != null && !existingCerts.isEmpty()) {
+                logger.info("Returning existing active certificate for user: " + user.getId());
+                return existingCerts.get(0); // Return the first active certificate found
             }
 
+            // 2. Check for badge requirements
+            List<String> badges = user.getBadges();
+            int requiredBadgeCount = BADGE_NAMES.length; // Total number of badges (15)
 
+            if (badges == null || badges.size() < requiredBadgeCount || !badges.contains(SolutionService.FINAL_BADGE_NAME)) {
+                String errorMessage = String.format(
+                        "User must have all %d badges, including '%s', to generate a certificate. User has %d badges.",
+                        requiredBadgeCount,
+                        SolutionService.FINAL_BADGE_NAME,
+                        (badges == null ? 0 : badges.size())
+                );
+                logger.warning("Certificate generation denied for user " + user.getId() + ": " + errorMessage);
+                throw new RuntimeException(errorMessage);
+            }
+
+            // 3. If no existing cert and requirements are met, create a new one
+            logger.info("Creating new certificate for user: " + user.getId());
             String courseTitle = determineCourseTitle(user.getPoints(), user.getBadges());
             String primarySkill = determinePrimarySkill(user.getBadges());
 
-
-            return createCertificateRecord(githubId, courseTitle, primarySkill, user.getBadges());
+            return createCertificateRecord(user, courseTitle, primarySkill, user.getBadges());
 
         } catch (Exception e) {
-            logger.severe("Failed to create certificate: " + e.getMessage());
+            logger.severe("Failed to create or retrieve certificate for user " + user.getId() + ": " + e.getMessage());
             throw new RuntimeException("Failed to create certificate: " + e.getMessage(), e);
         }
     }
@@ -86,20 +113,22 @@ public class CertificateService {
     // --- HELPER AND OTHER METHODS ---
 
 
-    private Certificate createCertificateRecord(String githubId, String courseTitle, String primarySkill, List<String> allSkills) {
+    /**
+     * Helper method to create and save the Certificate document.
+     * Now accepts a User object.
+     */
+    private Certificate createCertificateRecord(User user, String courseTitle, String latestBadge, List<String> allbadges) {
         try {
-            User user = userService.getUserByGithubId(githubId);
             String certificateId = UUID.randomUUID().toString();
             String githubProfileUrl = "https://github.com/" + user.getUsername();
-
 
             Certificate certificate = new Certificate();
             certificate.setId(certificateId);
             certificate.setUserId(user.getId());
             certificate.setUserName(user.getFullName() != null ? user.getFullName() : user.getUsername());
             certificate.setCourseTitle(courseTitle);
-            certificate.setPrimarySkill(primarySkill);
-            certificate.setAllSkills(allSkills);
+            certificate.setlatestBadge(latestBadge);
+            certificate.setallBadges(allbadges);
             certificate.setVerificationUrl(baseUrl + "/api/certificates/view/" + certificateId);
             certificate.setGithubProfileUrl(githubProfileUrl);
             certificate.setGeneratedAt(new Date());
@@ -108,7 +137,7 @@ public class CertificateService {
             return certificateRepository.save(certificate);
 
         } catch (Exception e) {
-            logger.severe("Failed to create certificate record for user " + githubId + ": " + e.getMessage());
+            logger.severe("Failed to create certificate record for user " + user.getId() + ": " + e.getMessage());
             throw new RuntimeException("Failed to create certificate record: " + e.getMessage(), e);
         }
     }
@@ -132,8 +161,4 @@ public class CertificateService {
         return certificateRepository.findById(certificateId)
                 .orElseThrow(() -> new RuntimeException("Certificate not found with ID: " + certificateId));
     }
-
-
-
-
 }

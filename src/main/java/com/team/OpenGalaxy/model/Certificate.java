@@ -15,8 +15,8 @@ public class Certificate {
     private String userId;
     private String userName;
     private String courseTitle;            // users fuull name
-    private String primarySkill; // latest badge
-    private List<String> allSkills;//all badges
+    private String latestBadge; // latest badge
+    private List<String> allBadges;//all badges
     private String verificationUrl;
     private Date generatedAt;
     private String issuedDate; // Formatted date string for display
@@ -70,20 +70,20 @@ public class Certificate {
         this.courseTitle = courseTitle;
     }
 
-    public String getPrimarySkill() {
-        return primarySkill;
+    public String getlatestBadge() {
+        return latestBadge;
     }
 
-    public void setPrimarySkill(String primarySkill) {
-        this.primarySkill = primarySkill;
+    public void setlatestBadge(String latestBadge) {
+        this.latestBadge = latestBadge;
     }
 
-    public List<String> getAllSkills() {
-        return allSkills;
+    public List<String> getallBadges() {
+        return allBadges;
     }
 
-    public void setAllSkills(List<String> allSkills) {
-        this.allSkills = allSkills;
+    public void setallBadges(List<String> allBadges) {
+        this.allBadges = allBadges;
     }
 public String getVerificationUrl() {
         return verificationUrl;
@@ -124,7 +124,7 @@ public String getVerificationUrl() {
                 ", userId='" + userId + '\'' +
                 ", userName='" + userName + '\'' +
                 ", courseTitle='" + courseTitle + '\'' +
-                ", primarySkill='" + primarySkill + '\'' +
+                ", latestBadge='" + latestBadge + '\'' +
                 ", generatedAt=" + generatedAt +
                 ", isActive=" + isActive +
                 '}';

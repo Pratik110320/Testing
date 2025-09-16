@@ -329,4 +329,6 @@ public class SolutionService {
             throw new RuntimeException("Failed to get achievement stats: " + e.getMessage(), e);
         }
     }
+
+
 }

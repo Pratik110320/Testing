@@ -19,7 +19,7 @@ public interface CertificateRepository extends MongoRepository<Certificate, Stri
 
     List<Certificate> findByCourseTitle(String courseTitle);
 
-    List<Certificate> findByPrimarySkill(String primarySkill);
+    List<Certificate> findBylatestBadge(String latestBadge);
 
     boolean existsByIdAndIsActive(String id, boolean isActive);
 

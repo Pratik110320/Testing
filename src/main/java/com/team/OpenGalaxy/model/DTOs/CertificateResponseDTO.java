@@ -8,8 +8,8 @@ class CertificateResponseDTO {
     private String id;
     private String userName;
     private String courseTitle;
-    private String primarySkill;
-    private List<String> allSkills;
+    private String latestBadge;
+    private List<String> allBadges;
     private String verificationUrl;
     private Date generatedAt;
     private String issuedDate;
@@ -42,20 +42,20 @@ class CertificateResponseDTO {
         this.courseTitle = courseTitle;
     }
 
-    public String getPrimarySkill() {
-        return primarySkill;
+    public String getlatestBadge() {
+        return latestBadge;
     }
 
-    public void setPrimarySkill(String primarySkill) {
-        this.primarySkill = primarySkill;
+    public void setlatestBadge(String latestBadge) {
+        this.latestBadge = latestBadge;
     }
 
-    public List<String> getAllSkills() {
-        return allSkills;
+    public List<String> getallBadges() {
+        return allBadges;
     }
 
-    public void setAllSkills(List<String> allSkills) {
-        this.allSkills = allSkills;
+    public void setallBadges(List<String> allBadges) {
+        this.allBadges = allBadges;
     }
 
     public String getVerificationUrl() {
